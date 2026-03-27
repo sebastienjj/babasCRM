@@ -82,13 +82,13 @@ export const importDealsFromExcel = async (file: File): Promise<{
           
           switch (field) {
             case 'stage':
-              const validStages = ['New', 'Contacted', 'Proposal', 'Won', 'Lost'];
+              const validStages = ['Lead', 'Discovery', 'Proposal', 'Design', 'Development', 'Review', 'Launch', 'Won', 'Lost'];
               const stage = cellValue.toString().trim();
               if (validStages.includes(stage)) {
                 deal[field] = stage as Deal['stage'];
               } else {
-                deal[field] = 'New';
-                errors.push(`Row ${i + 1}: Invalid stage '${stage}', defaulted to 'New'`);
+                deal[field] = 'Lead';
+                errors.push(`Row ${i + 1}: Invalid stage '${stage}', defaulted to 'Lead'`);
               }
               break;
             case 'amount':

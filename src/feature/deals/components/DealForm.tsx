@@ -31,7 +31,7 @@ const dealSchema = z.object({
     stage: z
         .string()
         .trim()
-        .refine((val) => ["New", "Contacted", "Proposal", "Negotiation", "Won", "Lost"].includes(val), {
+        .refine((val) => ["Lead", "Discovery", "Proposal", "Design", "Development", "Review", "Launch", "Won", "Lost"].includes(val), {
             message: "Stage is required",
         }),
     amount: z
@@ -40,7 +40,26 @@ const dealSchema = z.object({
             z.nan().transform(() => 0),
         ])
         .refine((val) => val >= 0, { message: "Amount cannot be negative" }),
+    hourlyRate: z
+        .union([
+            z.number({ error: "Enter a valid number" }),
+            z.nan().transform(() => 0),
+        ])
+        .optional(),
+    hoursEstimated: z
+        .union([
+            z.number({ error: "Enter a valid number" }),
+            z.nan().transform(() => 0),
+        ])
+        .optional(),
+    hoursLogged: z
+        .union([
+            z.number({ error: "Enter a valid number" }),
+            z.nan().transform(() => 0),
+        ])
+        .optional(),
     currency: z.enum(["USD", "EUR", "GBP"], { error: "Currency is required" }),
+    isOngoing: z.boolean().optional(),
     owner: z
         .string()
         .trim()
@@ -48,7 +67,7 @@ const dealSchema = z.object({
     closeDate: z.string().optional().or(z.literal("")),
     tags: z.array(z.string().trim().min(1)).max(10, "Up to 10 tags"),
     notes: z.string().optional().or(z.literal("")),
-    files: z.array(z.instanceof(File)).optional(),
+    files: z.any().optional(),
 })
 
 type DealFormValues = z.infer<typeof dealSchema>
@@ -57,9 +76,13 @@ const initialValues: DealFormValues = {
     dealName: "",
     company: "",
     contact: "",
-    stage: "New",
+    stage: "Lead",
     amount: 0,
-    currency: "EUR",
+    hourlyRate: undefined,
+    hoursEstimated: undefined,
+    hoursLogged: 0,
+    currency: "USD",
+    isOngoing: false,
     owner: "",
     closeDate: "",
     tags: [],
@@ -136,9 +159,13 @@ export default function DealForm({
                 dealName: initialData.dealName || "",
                 company: companyValue,
                 contact: contactValue,
-                stage: initialData.stage || "New",
+                stage: initialData.stage || "Lead",
                 amount: initialData.amount || 0,
-                currency: "EUR",
+                hourlyRate: (initialData as any).hourlyRate ?? undefined,
+                hoursEstimated: (initialData as any).hoursEstimated ?? undefined,
+                hoursLogged: (initialData as any).hoursLogged ?? 0,
+                currency: (initialData as any).currency || "EUR",
+                isOngoing: (initialData as any).isOngoing ?? false,
                 owner:
                     typeof initialData.owner === "object" && initialData.owner
                         ? initialData.owner.id || ""
@@ -263,10 +290,13 @@ export default function DealForm({
                             onChange={(val) => setValue("stage", val, { shouldValidate: true })}
                             openByDefault={false}
                             options={[
-                                { value: "New", label: "New" },
-                                { value: "Contacted", label: "Contacted" },
-                                { value: "Proposal", label: "Proposal Sent" },
-                                { value: "Negotiation", label: "Negotiation" },
+                                { value: "Lead", label: "Lead" },
+                                { value: "Discovery", label: "Discovery" },
+                                { value: "Proposal", label: "Proposal" },
+                                { value: "Design", label: "Design" },
+                                { value: "Development", label: "Development" },
+                                { value: "Review", label: "Review" },
+                                { value: "Launch", label: "Launch" },
                                 { value: "Won", label: "Won" },
                                 { value: "Lost", label: "Lost" },
                             ]}
@@ -296,7 +326,42 @@ export default function DealForm({
                             />
                         </div>
                     </FieldBlock>
+
+                    <FieldBlock name="hourlyRate" label="Hourly Rate" error={errors.hourlyRate?.message}>
+                        <input
+                            id="hourlyRate"
+                            type="number"
+                            {...register("hourlyRate", { valueAsNumber: true })}
+                            placeholder="e.g. 75 (leave empty for fixed-price)"
+                            className="w-full text-sm rounded-md shadow-sm border border-[var(--border-gray)] bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-gray-400 focus:outline-none"
+                        />
+                    </FieldBlock>
                 </div>
+
+                {values.hourlyRate && values.hourlyRate > 0 && (
+                    <div className="grid grid-cols-2 gap-3">
+                        <FieldBlock name="hoursEstimated" label="Hours Estimated" error={errors.hoursEstimated?.message}>
+                            <input
+                                id="hoursEstimated"
+                                type="number"
+                                {...register("hoursEstimated", { valueAsNumber: true })}
+                                placeholder="e.g. 40"
+                                className="w-full text-sm rounded-md shadow-sm border border-[var(--border-gray)] bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-gray-400 focus:outline-none"
+                            />
+                        </FieldBlock>
+
+                        <FieldBlock name="hoursLogged" label="Hours Logged" error={errors.hoursLogged?.message}>
+                            <input
+                                id="hoursLogged"
+                                type="number"
+                                step="0.5"
+                                {...register("hoursLogged", { valueAsNumber: true })}
+                                placeholder="0"
+                                className="w-full text-sm rounded-md shadow-sm border border-[var(--border-gray)] bg-background px-3 py-2 outline-none focus:ring-1 focus:ring-gray-400 focus:outline-none"
+                            />
+                        </FieldBlock>
+                    </div>
+                )}
 
                 <FieldBlock name="owner" label="Owner" error={errors.owner?.message}>
                     <SearchableDropdown
@@ -310,23 +375,42 @@ export default function DealForm({
                     />
                 </FieldBlock>
 
-                <FieldBlock name="closeDate" label="Close Date" error={errors.closeDate?.message}>
-                    <CalendarDropDown
-                        label={
-                            values.closeDate
-                                ? new Date(values.closeDate).toLocaleDateString("en-US", {
-                                      month: "long",
-                                      day: "numeric",
-                                      year: "numeric",
-                                  })
-                                : "Select closed Date"
-                        }
-                        value={values.closeDate ? new Date(values.closeDate) : null}
-                        buttonClassName="min-w-[360px] bg-blue-50 hover:bg-blue-100"
-                        triggerIcon="calendar"
-                        onChange={(date) => setValue("closeDate", date.toISOString().split("T")[0], { shouldValidate: true })}
-                    />
-                </FieldBlock>
+                <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={values.isOngoing || false}
+                            onChange={(e) => {
+                                setValue("isOngoing", e.target.checked, { shouldValidate: true })
+                                if (e.target.checked) {
+                                    setValue("closeDate", "", { shouldValidate: true })
+                                }
+                            }}
+                            className="w-4 h-4 rounded border-gray-300"
+                        />
+                        <span className="text-sm font-medium">Ongoing (no end date)</span>
+                    </label>
+                </div>
+
+                {!values.isOngoing && (
+                    <FieldBlock name="closeDate" label="Close Date" error={errors.closeDate?.message}>
+                        <CalendarDropDown
+                            label={
+                                values.closeDate
+                                    ? new Date(values.closeDate).toLocaleDateString("en-US", {
+                                          month: "long",
+                                          day: "numeric",
+                                          year: "numeric",
+                                      })
+                                    : "Select close date"
+                            }
+                            value={values.closeDate ? new Date(values.closeDate) : null}
+                            buttonClassName="min-w-[360px] bg-blue-50 hover:bg-blue-100"
+                            triggerIcon="calendar"
+                            onChange={(date) => setValue("closeDate", date.toISOString().split("T")[0], { shouldValidate: true })}
+                        />
+                    </FieldBlock>
+                )}
 
                 <TagInput
                     name="Tags"

@@ -203,7 +203,7 @@ export default function TODO() {
         setIsEditing={setIsEditing}
         setIsExporting={setIsExporting}
       />
-      <div className='py-8 px-6 overflow-x-hidden'>
+      <div className='py-4 px-3 md:py-6 md:px-4 lg:px-6 overflow-x-hidden'>
         {view === 'table' ? (
           <>
             {loading ? (

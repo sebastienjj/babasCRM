@@ -13,7 +13,6 @@ import {getCompanyOptions} from "../libs/companyData"
 import TagInput from "@/components/ui/TagInput"
 import CustomDropdown from "@/components/ui/CustomDropdown"
 import {validateCompany, validateOwner} from "@/feature/forms/lib/formValidation";
-import {useSession} from "next-auth/react";
 
 const prospectSchema = z.object({
     fullName: z.string().trim().min(1, "Full name is required"),
@@ -34,7 +33,7 @@ const prospectSchema = z.object({
         .string()
         .trim()
         .refine(
-            (val) => ["New", "Qualified", "Converted", "Cold", "Warmlead", "Notintrested"].includes(val),
+            (val) => ["New", "Researching", "Contacted", "Responded", "MeetingBooked", "Converted", "NotInterested"].includes(val),
             {message: "Status is required"}
         ),
     owner: z.string().refine(async (id) => {
@@ -75,13 +74,12 @@ export default function ProspectForm({
 }) {
     const [tagInput, setTagInput] = useState("")
     const {lastCompanyId} = useCompaniesStore();
-    const {data: userData} = useSession();
 
     useEffect(() => {
         useCompaniesStore.getState().fetchCompanies()
     }, [])
 
-    const getInitialValues = (userData: { user: { id: string } | null } | null): ProspectFormValues => {
+    const getInitialValues = (): ProspectFormValues => {
         if (mode === "edit" && initialData) {
             const {companies} = useCompaniesStore.getState()
 
@@ -129,7 +127,7 @@ export default function ProspectForm({
         return {
             ...baseInitialValues,
             company: lastCompanyId || "",
-            owner: userData?.user?.id || "",
+            owner: "cmn6elt4i00006ta8tu4u7g9y",
         }
     }
 
@@ -142,11 +140,11 @@ export default function ProspectForm({
         formState: {errors, isSubmitting},
     } = useForm<ProspectFormValues>({
         resolver: zodResolver(prospectSchema),
-        defaultValues: getInitialValues(userData),
+        defaultValues: getInitialValues(),
     })
 
     useEffect(() => {
-        reset(getInitialValues(userData))
+        reset(getInitialValues())
     }, [initialData, mode, userOptions, reset])
 
     const values = watch()
@@ -160,7 +158,7 @@ export default function ProspectForm({
         onSubmit(payload)
 
         if (mode === "add") {
-            reset(getInitialValues(userData))
+            reset(getInitialValues())
             setTagInput("")
         }
     })
@@ -225,11 +223,12 @@ export default function ProspectForm({
                         placeholder="Select Status"
                         options={[
                             {value: "New", label: "New"},
-                            {value: "Cold", label: "Cold"},
-                            {value: "Qualified", label: "Qualified"},
-                            {value: "Warmlead", label: "Warm Lead"},
+                            {value: "Researching", label: "Researching"},
+                            {value: "Contacted", label: "Contacted"},
+                            {value: "Responded", label: "Responded"},
+                            {value: "MeetingBooked", label: "Meeting Booked"},
                             {value: "Converted", label: "Converted"},
-                            {value: "Notintrested", label: "Not Interested"},
+                            {value: "NotInterested", label: "Not Interested"},
                         ]}
                     />
                 </FieldBlock>
@@ -259,7 +258,7 @@ export default function ProspectForm({
                     type="button"
                     className="flex-1"
                     onClick={() => {
-                        reset(getInitialValues(userData))
+                        reset(getInitialValues())
                         onCancel()
                     }}
                 >

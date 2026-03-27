@@ -9,7 +9,6 @@ import { useDealStore } from '../stores/useDealStore'
 import toast from "react-hot-toast"
 import { useEffect } from "react"
 import { useUserStore } from "@/feature/user/store/userStore"
-import { useSession } from "next-auth/react"
 
 type DealSlideOverProps = {
   open: boolean
@@ -31,7 +30,7 @@ const { users, loading: usersLoading, currentUser, initializeCurrentUser } = use
       value: user.id,
       label: user.name || user.email
   }));
-const {data: currentUserId} = useSession();
+const devUserId = "cmn6elt4i00006ta8tu4u7g9y";
 useEffect(() => {
   if (open && !currentUser) {
     initializeCurrentUser();
@@ -107,7 +106,7 @@ useEffect(() => {
             initialData={deal}
             usersLoading={usersLoading}
             userOptions={userOptions}
-  currentUserId={currentUserId?.user?.id ?? undefined} // ✅ fixes the type
+  currentUserId={devUserId}
             defaultStage={defaultStage}
 
           />

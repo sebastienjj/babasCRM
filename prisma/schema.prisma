@@ -39,13 +39,17 @@ model User {
   companiesByOwner Company[]  @relation("company_owner")
   activityLogs     ActivityLog[]
   emailSettings    EmailSettings[]
+  outreachLogs     OutreachLog[]
 }
 
 enum DealStage {
-  New
-  Contacted
+  Lead
+  Discovery
   Proposal
-  Negotiation
+  Design
+  Development
+  Review
+  Launch
   Won
   Lost
 }
@@ -65,7 +69,11 @@ model Deal {
   contact     Customer? @relation(fields: [contactId], references: [id], onDelete: Cascade)
   stage       DealStage
   amount      Float
+  hourlyRate  Float?
+  hoursEstimated Float?
+  hoursLogged Float     @default(0)
   currency    Currency
+  isOngoing   Boolean   @default(false)
   ownerId     String
   owner       User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   closeDate   DateTime?
@@ -174,30 +182,38 @@ model Meeting {
 
 enum ProspectStatus {
   New
-  Cold
-  Qualified
-  Warmlead
+  Researching
+  Contacted
+  Responded
+  MeetingBooked
   Converted
-  Notintrested
+  NotInterested
 }
 
 model Prospect {
-  id         String         @id @default(uuid())
-  userId     String
-  user       User           @relation("userId", fields: [userId], references: [id], onDelete: Cascade)
-  fullName   String
-  companyId  String?
-  company    Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  email      String?
-  phone      String?
-  status     ProspectStatus @default(New)
-  lastContact DateTime?
-  tags       String[]       @default([])
-  notes      String?
-  ownerId    String
-  owner      User           @relation("ownerId", fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation("userId", fields: [userId], references: [id], onDelete: Cascade)
+  fullName      String
+  companyId     String?
+  company       Company?       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  email         String?
+  phone         String?
+  domain        String?
+  website       String?
+  nameType      String?
+  firstDetected DateTime?
+  lastDetected  DateTime?
+  source        String?
+  status        ProspectStatus @default(New)
+  lastContact   DateTime?
+  tags          String[]       @default([])
+  notes         String?
+  ownerId       String
+  owner         User           @relation("ownerId", fields: [ownerId], references: [id], onDelete: Cascade)
+  outreachLogs  OutreachLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@index([ownerId])
   @@index([userId])
@@ -295,4 +311,18 @@ model EmailSettings {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model OutreachLog {
+  id            String   @id @default(uuid())
+  prospectId    String
+  prospect      Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  action        String
+  details       String?
+  performedById String
+  performedBy   User     @relation(fields: [performedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@index([prospectId])
+  @@index([performedById])
 }

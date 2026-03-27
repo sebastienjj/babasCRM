@@ -4,10 +4,16 @@ export type Prospect = {
   company: string;
   email?: string | null;
   phone?: string | null;
-  status: 'New' | 'Cold' | 'Qualified' | 'Warmlead' | 'Converted' | 'Notintrested';
+  status: 'New' | 'Researching' | 'Contacted' | 'Responded' | 'MeetingBooked' | 'Converted' | 'NotInterested';
   lastContact?: string | null;
   tags?: string[];
   notes?: string | null;
+  domain?: string;
+  website?: string;
+  nameType?: string;
+  firstDetected?: string;
+  lastDetected?: string;
+  source?: string;
   files?: Array<{ url: string; name: string; size: number }>;
   ownerId: string;
   userId: string;
@@ -31,11 +37,12 @@ export type Contact = {
   ownerAvatar?: string;
   status?:
     | 'New'
-    | 'Cold'
-    | 'Warm Lead'
-    | 'Qualified'
+    | 'Researching'
+    | 'Contacted'
+    | 'Responded'
+    | 'MeetingBooked'
     | 'Converted'
-    | 'Not Interested';
+    | 'NotInterested';
   lastContact?: string;
   tags?: string;
 };

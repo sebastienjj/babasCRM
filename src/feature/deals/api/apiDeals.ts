@@ -1,7 +1,6 @@
 // src/feature/deals/api/apiDeals.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/feature/auth/lib/auth";
+import { getSessionOrDev } from "@/libs/devSession";
 import { prisma } from "@/libs/prisma";
 import { createDealSchema, updateDealSchema } from "../schema/dealSchema";
 import { withActivityLogging } from "@/libs/apiUtils";
@@ -9,7 +8,7 @@ import { ActivityAction, Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionOrDev();
     if (!session?.user?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -34,11 +33,15 @@ export async function POST(req: Request) {
         dealName: parsedData.dealName,
         stage: parsedData.stage,
         amount: parsedData.amount,
+        hourlyRate: Number.isFinite((body as any).hourlyRate) ? (body as any).hourlyRate : null,
+        hoursEstimated: Number.isFinite((body as any).hoursEstimated) ? (body as any).hoursEstimated : null,
+        hoursLogged: Number.isFinite((body as any).hoursLogged) ? (body as any).hoursLogged : 0,
         currency: parsedData.currency,
+        isOngoing: (body as any).isOngoing ?? false,
         ownerId: parsedData.ownerId || session.user.id,
         companyId: parsedData.companyId ?? null,
         contactId: parsedData.contactId ?? null,
-        closeDate: parsedData.closeDate ? new Date(parsedData.closeDate) : null,
+        closeDate: (body as any).isOngoing ? null : (parsedData.closeDate ? new Date(parsedData.closeDate) : null),
         tags: parsedData.tags ?? [],
         notes: parsedData.notes ?? null,
         files: parsedData.files ?? undefined,
@@ -163,7 +166,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "PATCH") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id)
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -179,20 +182,35 @@ export async function handleMethodWithId(req: Request, id: string) {
       }
 
       const parsedData = parsed.data;
-      const data = {
+      const data: any = {
           dealName: parsedData.dealName,
-          companyId: parsedData.companyId,
-          contactId: parsedData.contactId,
-          ownerId: parsedData.ownerId || session.user.id,
           stage: parsedData.stage,
           amount: parsedData.amount,
+          hourlyRate: Number.isFinite((body as any).hourlyRate) ? (body as any).hourlyRate : null,
+          hoursEstimated: Number.isFinite((body as any).hoursEstimated) ? (body as any).hoursEstimated : null,
+          hoursLogged: Number.isFinite((body as any).hoursLogged) ? (body as any).hoursLogged : 0,
           currency: parsedData.currency,
-          closeDate: parsedData.closeDate ? new Date(parsedData.closeDate) : undefined,
+          isOngoing: (body as any).isOngoing ?? false,
+          closeDate: (body as any).isOngoing ? null : (parsedData.closeDate ? new Date(parsedData.closeDate) : undefined),
           tags: parsedData.tags ?? undefined,
           notes: parsedData.notes ?? undefined,
           files: parsedData.files ?? undefined,
-          lastActivity: undefined as Date | undefined, 
+          lastActivity: undefined as Date | undefined,
+          owner: { connect: { id: parsedData.ownerId || session.user.id } },
         }
+
+      // Use nested connect for optional relations
+      if (parsedData.companyId) {
+        data.company = { connect: { id: parsedData.companyId } }
+      } else if (parsedData.companyId === null) {
+        data.company = { disconnect: true }
+      }
+
+      if (parsedData.contactId) {
+        data.contact = { connect: { id: parsedData.contactId } }
+      } else if (parsedData.contactId === null) {
+        data.contact = { disconnect: true }
+      }
 
       const getPreviousData = async () => {
         const deal = await prisma.deal.findUnique({
@@ -241,7 +259,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "DELETE") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id)
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -272,10 +290,10 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
-  } catch (err) {
-    console.error("deals/:id handler error", err);
+  } catch (err: any) {
+    console.error("deals/:id handler error", err?.message || err);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: err?.message || "Internal Server Error" },
       { status: 500 }
     );
   }

@@ -12,9 +12,9 @@ interface DealsStats {
   newDeals: number;
   activeDeals: number;
   wonDeals: number;
-  contactedDeals: number;
+  discoveryDeals: number;
   proposalDeals: number;
-  negotiationDeals: number;
+  designDeals: number;
   conversionRate: number;
 }
 
@@ -40,15 +40,15 @@ export function PipelineCard({ range = "this_month" }: { range?: string }) {
           title: "Pipeline",
           stages: [
               {stage: "New Leads", count: stats.newDeals, color: "bg-purple-500"},
-              {stage: "Contacted", count: stats.contactedDeals, color: "bg-purple-400"},
-              {stage: "Proposal Sent", count: stats.proposalDeals, color: "bg-purple-300"},
-              {stage: "Negotiation", count: stats.negotiationDeals, color: "bg-purple-200"},
+              {stage: "Discovery", count: stats.discoveryDeals, color: "bg-purple-400"},
+              {stage: "Proposal", count: stats.proposalDeals, color: "bg-purple-300"},
+              {stage: "Design+", count: stats.designDeals, color: "bg-purple-200"},
               {stage: "Won", count: stats.wonDeals, color: "bg-purple-100"},
           ],
           conversionRates: [
-            stats.totalDeals > 0 ? (stats.contactedDeals / stats.totalDeals) * 100 : 0,
+            stats.totalDeals > 0 ? (stats.discoveryDeals / stats.totalDeals) * 100 : 0,
             stats.totalDeals > 0 ? (stats.proposalDeals / stats.totalDeals) * 100 : 0,
-            stats.totalDeals > 0 ? (stats.negotiationDeals / stats.totalDeals) * 100 : 0,
+            stats.totalDeals > 0 ? (stats.designDeals / stats.totalDeals) * 100 : 0,
             stats.totalDeals > 0 ? (stats.wonDeals / stats.totalDeals) * 100 : 0,
           ],
         }

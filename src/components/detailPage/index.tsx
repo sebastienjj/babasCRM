@@ -35,6 +35,7 @@ interface DetailModalProps {
     isDeleting?: boolean;
     isEditing?: boolean;
     isExporting?: boolean;
+    extraContent?: React.ReactNode;
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({
@@ -55,6 +56,7 @@ const DetailModal: React.FC<DetailModalProps> = ({
                                                      isDeleting = false,
                                                      isEditing = false,
                                                      isExporting = false,
+                                                     extraContent,
                                                  }) => {
     if (!isOpen) return null;
 
@@ -177,6 +179,12 @@ const DetailModal: React.FC<DetailModalProps> = ({
                             <div className="text-sm text-gray-500">No Status yet</div>
                         )}
                     </section>
+
+                    {extraContent && (
+                        <section className="p-6">
+                            {extraContent}
+                        </section>
+                    )}
 
                 </div>
                 <div className=''>

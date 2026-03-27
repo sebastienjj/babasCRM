@@ -74,11 +74,28 @@ export default function DealDetail({
     });
   };
 
+  const d = deal as any;
+  const sym = getCurrencySymbol(d.currency);
+  const isHourly = d.hourlyRate && d.hourlyRate > 0;
+  const earned = isHourly ? d.hourlyRate * (d.hoursLogged || 0) : 0;
+  const projected = isHourly && d.hoursEstimated ? d.hourlyRate * d.hoursEstimated : null;
+
   const details = [
     { label: 'Company', value: getCompanyName(deal.company) },
     { label: 'Contact', value: getContactName(deal.contact) },
     { label: 'Stage', value: (<Badge variant={deal.stage}>{deal.stage}</Badge>) },
-    { label: 'Amount', value: `${getCurrencySymbol((deal as any).currency)}${deal.amount.toLocaleString()}` },
+
+    // Revenue section — different display for hourly vs fixed
+    isHourly
+      ? { label: 'Hourly Rate', value: `${sym}${d.hourlyRate}/hr` }
+      : null,
+    isHourly
+      ? { label: 'Hours', value: `${d.hoursLogged || 0}${d.hoursEstimated ? ` / ${d.hoursEstimated} estimated` : ''} hrs` }
+      : null,
+    isHourly
+      ? { label: 'Earned', value: `${sym}${earned.toLocaleString()}${projected ? ` / ${sym}${projected.toLocaleString()} projected` : ''}` }
+      : { label: 'Amount', value: `${sym}${deal.amount.toLocaleString()}` },
+
     {
       label: 'Owner',
       value: (
@@ -89,8 +106,8 @@ export default function DealDetail({
       ),
     },
     deal.priority && { label: 'Tags', value: deal.priority },
-    deal.closeDate && { label: 'Closed Date', value:formatDate((deal as any).closeDate) },
-    (deal as any).lastActivity && { label:  'Last Activity', value: formatDate((deal as any).lastActivity) },
+    { label: d.isOngoing ? 'Duration' : 'Closed Date', value: d.isOngoing ? 'Ongoing' : (deal.closeDate ? formatDate(d.closeDate) : 'Not set') },
+    d.lastActivity && { label: 'Last Activity', value: formatDate(d.lastActivity) },
 
   ].filter(Boolean) as { label: string; value: React.ReactNode }[];
 

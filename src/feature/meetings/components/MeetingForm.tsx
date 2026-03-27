@@ -42,7 +42,7 @@ const meetingSchema = z
     repeatEvery: z.number().optional(),
     repeatOn: z.string().optional().or(z.literal("")),
     ends: z.string().optional().or(z.literal("")),
-    files: z.array(z.instanceof(File)).optional(),
+    files: z.any().optional(),
   })
   .superRefine((val, ctx) => {
     if (val.endTime && val.startTime && val.endTime <= val.startTime) {

@@ -14,7 +14,6 @@ import {useCompaniesStore} from "@/feature/companies/stores/useCompaniesStore"
 import {getCompanyOptions} from "@/feature/deals/libs/companyData"
 import {Customer} from "../types/types"
 import {validateCompany, validateOwner} from "@/feature/forms/lib/formValidation"
-import {useSession} from "next-auth/react";
 
 const customerSchema = z.object({
     fullName: z.string().trim().min(1, "Full name is required"),
@@ -37,7 +36,7 @@ const customerSchema = z.object({
         .refine(async (id) => await validateOwner(id), {message: "User does not exist"}),
     tags: z.array(z.string().trim().min(1)).max(10, "Up to 10 tags"),
     notes: z.string().optional().or(z.literal("")),
-    files: z.array(z.instanceof(File)).optional(),
+    files: z.any().optional(),
 })
 
 type CustomerFormValues = z.infer<typeof customerSchema>
@@ -61,13 +60,12 @@ export default function CustomerForm({
     const [uploading, setUploading] = useState(false)
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([])
     const {lastCompanyId} = useCompaniesStore()
-    const {data: userData} = useSession();
 
     useEffect(() => {
         useCompaniesStore.getState().fetchCompanies()
     }, [])
 
-    const getInitialValues = (userData: { user: { id: string } | null } | null): CustomerFormValues => {
+    const getInitialValues = (): CustomerFormValues => {
         if (mode === "edit" && initialData) {
             const {companies} = useCompaniesStore.getState()
 
@@ -125,7 +123,7 @@ export default function CustomerForm({
             email: "",
             status: "",
             phone: "",
-            owner: userData?.user ? userData.user.id : "",
+            owner: "cmn6elt4i00006ta8tu4u7g9y",
             tags: [],
             notes: "",
             files: [],
@@ -141,11 +139,11 @@ export default function CustomerForm({
         formState: {errors, isSubmitting}
     } = useForm<CustomerFormValues>({
         resolver: zodResolver(customerSchema),
-        defaultValues: getInitialValues(userData),
+        defaultValues: getInitialValues(),
     })
 
     useEffect(() => {
-        reset(getInitialValues(userData))
+        reset(getInitialValues())
     }, [initialData, mode, userOptions, lastCompanyId, reset])
 
     const values = watch()
@@ -175,7 +173,7 @@ export default function CustomerForm({
         }
         onSubmit(payload)
         if (mode === "add") {
-            reset(getInitialValues(userData))
+            reset(getInitialValues())
             setTagInput("")
             setUploadedFiles([])
         }
@@ -276,7 +274,7 @@ export default function CustomerForm({
                     type="button"
                     className="flex-1"
                     onClick={() => {
-                        reset(getInitialValues(userData))
+                        reset(getInitialValues())
                         onCancel()
                     }}
                 >

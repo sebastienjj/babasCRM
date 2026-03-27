@@ -1,12 +1,11 @@
 import nodemailer from 'nodemailer';
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/feature/auth/lib/auth";
+import { getSessionOrDev } from "@/libs/devSession";
 import { prisma } from "@/libs/prisma";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionOrDev();
 
     if (!session?.user?.id) {
       return NextResponse.json(

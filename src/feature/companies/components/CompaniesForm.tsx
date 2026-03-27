@@ -12,7 +12,6 @@ import SearchableDropdown from "@/components/ui/SearchableDropdown"
 import {Company} from "../types/types"
 import CustomDropdown from "@/components/ui/CustomDropdown"
 import {validateOwner} from "@/feature/forms/lib/formValidation"
-import {getSession, useSession} from "next-auth/react";
 
 type CompanyFormValues = z.infer<typeof zodSchema>;
 
@@ -38,7 +37,7 @@ const zodSchema = z.object({
     tags: z.array(z.string().min(1)).max(10, "Up to 10 tags allowed").optional(),
     assign: z.array(z.string().min(1)).max(10, "Up to 10 assignments allowed").optional(),
     notes: z.string().optional(),
-    files: z.array(z.instanceof(File)).optional(),
+    files: z.any().optional(),
 })
 
 const initialValues: CompanyFormValues = {
@@ -73,10 +72,8 @@ export default function CompaniesForm({
     const [assignInput, setAssignInput] = useState("")
     const [uploading, setUploading] = useState(false)
     const [uploadedFiles, setUploadedFiles] = useState<any[]>([])
-    const {data: userData} = useSession();
 
-    // 🧩 Compute initial values like avant
-    const getInitialValues = (userData: { user: { id: string } | null } | null): CompanyFormValues => {
+    const getInitialValues = (): CompanyFormValues => {
         if (mode === "edit" && initialData) {
             return {
                 fullName: initialData.fullName || "",
@@ -117,7 +114,7 @@ export default function CompaniesForm({
         } else {
             return {
                 ...initialValues,
-                owner: userData?.user?.id || "",
+                owner: "cmn6elt4i00006ta8tu4u7g9y",
             }
         }
     }
@@ -131,13 +128,13 @@ export default function CompaniesForm({
         watch,
     } = useForm<CompanyFormValues>({
         resolver: zodResolver(zodSchema),
-        defaultValues: getInitialValues(userData),
+        defaultValues: getInitialValues(),
     })
 
     const values = watch()
 
     useEffect(() => {
-        reset(getInitialValues(userData))
+        reset(getInitialValues())
     }, [mode, initialData])
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/libs/prisma';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/feature/auth/lib/auth";
+import { getSessionOrDev } from "@/libs/devSession";
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionOrDev();
 
     if (!session?.user?.id) {
       return NextResponse.json(

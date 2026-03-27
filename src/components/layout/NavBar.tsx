@@ -24,8 +24,8 @@ export default function NavBar() {
         };
       case 'deals':
         return {
-          title: 'Deals',
-          description: 'Track and manage all your commercial opportunities in one place.'
+          title: 'Projects',
+          description: 'Track and manage all your web design projects in one place.'
         };
       case 'todo':
         return {
@@ -49,8 +49,8 @@ export default function NavBar() {
         };
       case 'prospects':
         return {
-          title: 'Prospects',
-          description: 'Manage and track all your prospect interactions, from first contact to qualification.'
+          title: 'Leads',
+          description: 'Manage and track all your lead interactions, from first contact to qualification.'
         };
       case 'settings/ai':
         return {
@@ -96,13 +96,13 @@ export default function NavBar() {
   }, []);
 
   return (
-    <header className="flex items-center h-[84px] w-full justify-between px-8 py-4  border-b  border-[var(--border-gray)] relative">
-      <div className="flex flex-col w-full h-[52px] gap-[4px] ">
-        <h1 className="text-xl font-semibold leading-[28px] text-[var(--foreground)]">{pageInfo.title}</h1>
-        <p className="text-sm  leading-[20px] text-[var(--brand-gray)]">{pageInfo.description}</p>
+    <header className="flex items-center h-[64px] w-full justify-between px-4 md:px-6 lg:px-8 py-3 border-b border-[var(--border-gray)] relative flex-shrink-0">
+      <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+        <h1 className="text-lg font-semibold leading-[24px] text-[var(--foreground)] truncate">{pageInfo.title}</h1>
+        <p className="text-xs leading-[16px] text-[var(--brand-gray)] truncate hidden sm:block">{pageInfo.description}</p>
       </div>
 
-      <div className="flex items-center h-[40px] gap-4">
+      <div className="flex items-center h-[40px] gap-3 flex-shrink-0">
         <div className="flex items-center gap-3">
           <IconButton icon={
             <img src="\icons\NotificationIcon.svg"

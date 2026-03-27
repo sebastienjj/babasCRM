@@ -42,14 +42,10 @@ const Deals = () => {
       if (typeof contact === 'object' && contact?.fullName) return contact.fullName;
       return 'Unknown Contact';
     } },
-    { key: 'stage', title: 'Stage', dataIndex: 'stage', sortable: false, render: (stage) => <Badge variant={stage as any}>{stage === 'Proposal' ? 'Proposal Sent' : stage}</Badge> },
-    { key: 'amount', title: 'Amount', dataIndex: 'amount', sortable: false, render: (amount, record) => {
-      if (!amount) return '-';
-
-      const currency = (record as any).currency || 'USD';
-      const numAmount = amount as number;
-
-      // Show appropriate currency symbol
+    { key: 'stage', title: 'Stage', dataIndex: 'stage', sortable: false, render: (stage) => <Badge variant={stage as any}>{stage}</Badge> },
+    { key: 'amount', title: 'Revenue', dataIndex: 'amount', sortable: false, render: (amount, record) => {
+      const r = record as any;
+      const currency = r.currency || 'USD';
       const getCurrencySymbol = (curr: string) => {
         switch (curr?.toUpperCase()) {
           case 'EUR': return '€';
@@ -58,9 +54,23 @@ const Deals = () => {
           default: return '$';
         }
       };
-
       const symbol = getCurrencySymbol(currency);
-      return `${symbol}${numAmount.toLocaleString()}`;
+
+      // Hourly deal: show earned from hours
+      if (r.hourlyRate && r.hourlyRate > 0) {
+        const earned = r.hourlyRate * (r.hoursLogged || 0);
+        const estimated = r.hoursEstimated ? r.hourlyRate * r.hoursEstimated : null;
+        return (
+          <span className="flex flex-col">
+            <span>{symbol}{earned.toLocaleString()}</span>
+            <span className="text-xs text-gray-400">{r.hoursLogged || 0}{r.hoursEstimated ? `/${r.hoursEstimated}` : ''} hrs @ {symbol}{r.hourlyRate}/hr</span>
+          </span>
+        );
+      }
+
+      // Fixed deal
+      if (amount == null) return '-';
+      return `${symbol}${(amount as number).toLocaleString()}`;
     } },
     { key: 'owner', title: 'Owner', dataIndex: 'owner', sortable: false, render: (owner, record) => {
       if (!owner) return 'Unassigned';
@@ -137,7 +147,7 @@ const Deals = () => {
         setSelectedDealRows([]);
       }}
     />
-    <div className='py-8 px-6 overflow-x-hidden'>
+    <div className='py-4 px-3 md:py-6 md:px-4 lg:px-6 overflow-x-hidden'>
 
         {view === 'table' ? (
           <>

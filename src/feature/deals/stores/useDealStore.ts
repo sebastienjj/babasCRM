@@ -42,11 +42,14 @@ export const useDealStore = create<DealStore>((set, get) => ({
   error: null,
   filters: {
     status: [
-      { id: "all", label: "All Status", checked: true },
-      { id: "new", label: "New", checked: false },
-      { id: "contacted", label: "Contacted", checked: false },
-      { id: "proposal", label: "Proposal Sent", checked: false },
-      { id: "negotiation", label: "Negotiation", checked: false },
+      { id: "all", label: "All Stages", checked: true },
+      { id: "lead", label: "Lead", checked: false },
+      { id: "discovery", label: "Discovery", checked: false },
+      { id: "proposal", label: "Proposal", checked: false },
+      { id: "design", label: "Design", checked: false },
+      { id: "development", label: "Development", checked: false },
+      { id: "review", label: "Review", checked: false },
+      { id: "launch", label: "Launch", checked: false },
       { id: "won", label: "Won", checked: false },
       { id: "lost", label: "Lost", checked: false },
     ],
@@ -56,8 +59,6 @@ export const useDealStore = create<DealStore>((set, get) => ({
       { id: "weblead", label: "Web Lead", checked: false },
       { id: "referral", label: "Referral", checked: false },
       { id: "vip", label: "VIP", checked: false },
-      { id: "construction", label: "Construction", checked: false },
-      { id: "architecture", label: "Architecture", checked: false },
     ],
   },
   closedDateFilter: null,
@@ -113,10 +114,13 @@ export const useDealStore = create<DealStore>((set, get) => ({
       const activeStatus = filters.status.filter((s: any) => s.checked && s.id !== "all");
       if (activeStatus.length > 0) {
         const map: Record<string, string> = {
-          new: 'New',
-          contacted: 'Contacted',
+          lead: 'Lead',
+          discovery: 'Discovery',
           proposal: 'Proposal',
-          negotiation: 'Negotiation',
+          design: 'Design',
+          development: 'Development',
+          review: 'Review',
+          launch: 'Launch',
           won: 'Won',
           lost: 'Lost',
         };
@@ -193,11 +197,14 @@ export const useDealStore = create<DealStore>((set, get) => ({
   resetFilters: async () => {
     const initial = {
       status: [
-        { id: "all", label: "All Status", checked: true },
-        { id: "new", label: "New", checked: false },
-        { id: "contacted", label: "Contacted", checked: false },
-        { id: "proposal", label: "Proposal Sent", checked: false },
-        { id: "negotiation", label: "Negotiation", checked: false },
+        { id: "all", label: "All Stages", checked: true },
+        { id: "lead", label: "Lead", checked: false },
+        { id: "discovery", label: "Discovery", checked: false },
+        { id: "proposal", label: "Proposal", checked: false },
+        { id: "design", label: "Design", checked: false },
+        { id: "development", label: "Development", checked: false },
+        { id: "review", label: "Review", checked: false },
+        { id: "launch", label: "Launch", checked: false },
         { id: "won", label: "Won", checked: false },
         { id: "lost", label: "Lost", checked: false },
       ],
@@ -207,8 +214,6 @@ export const useDealStore = create<DealStore>((set, get) => ({
         { id: "weblead", label: "Web Lead", checked: false },
         { id: "referral", label: "Referral", checked: false },
         { id: "vip", label: "VIP", checked: false },
-        { id: "construction", label: "Construction", checked: false },
-        { id: "architecture", label: "Architecture", checked: false },
       ],
     };
     set({ filters: initial, closedDateFilter: null, searchTerm: "" });
@@ -440,7 +445,7 @@ export const useDealStore = create<DealStore>((set, get) => ({
             ...dealData,
             company: dealData.company || 'Unknown Company',
             contact: dealData.contact || 'Unknown Contact',
-            stage: dealData.stage || 'New',
+            stage: dealData.stage || 'Lead',
             amount: dealData.amount || 0,
           };
 

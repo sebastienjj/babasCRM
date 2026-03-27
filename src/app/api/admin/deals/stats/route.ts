@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {prisma} from "@/libs/prisma";
-import {getServerSession} from "next-auth/next";
-import {authOptions} from "@/feature/auth/lib/auth";
+import {getSessionOrDev} from "@/libs/devSession";
 
 // Allowed range keys for stats
 type RangeKey =
@@ -112,9 +111,9 @@ async function computeMetrics(baseWhere: any, prevWhere: any) {
         totalActive,
         totalNew,
         totalWon,
-        totalContacted,
+        totalDiscovery,
         totalProposal,
-        totalNegotiation,
+        totalDesign,
         expectedRevenueActive,
         prevTotalDeals,
         prevTotalActive,
@@ -130,14 +129,16 @@ async function computeMetrics(baseWhere: any, prevWhere: any) {
         prisma.prospect.count({where: {...baseWhere}}),
         // totalWon
         prisma.deal.count({where: {...baseWhere, stage: "Won"}}),
-        // totalContacted
-        prisma.deal.count({where: {...baseWhere, stage: {in: ["Contacted", "Proposal", "Negotiation", "Won"]}}}),
+        // totalDiscovery
+        prisma.deal.count({where: {...baseWhere, stage: {in: ["Discovery", "Proposal", "Design", "Development", "Review", "Launch", "Won"]}}}),
         // totalProposal
-        prisma.deal.count({where: {...baseWhere, stage: {in: ["Proposal", "Negotiation", "Won"]}}}),
-        // totalNegotiation
-        prisma.deal.count({where: {...baseWhere, stage: {in: ["Negotiation", "Won"]}}}),
-        // expectedRevenueActive
-        prisma.deal.aggregate({_sum: {amount: true}, where: {...baseWhere, NOT: {stage: {in: ["Lost"]}}}}),
+        prisma.deal.count({where: {...baseWhere, stage: {in: ["Proposal", "Design", "Development", "Review", "Launch", "Won"]}}}),
+        // totalDesign
+        prisma.deal.count({where: {...baseWhere, stage: {in: ["Design", "Development", "Review", "Launch", "Won"]}}}),
+        // Revenue deals (current) - fetch all non-lost deals to calculate revenue
+        prisma.deal.findMany({
+            where: {...baseWhere, NOT: {stage: {in: ["Lost"]}}},
+        }),
 
         // Previous period values
         // prevTotalDeals
@@ -148,24 +149,47 @@ async function computeMetrics(baseWhere: any, prevWhere: any) {
         prisma.prospect.count({where: {...prevWhere }}),
         // prevTotalWon
         prisma.deal.count({where: {...prevWhere, stage: "Won"}}),
-        // prevExpectedRevenueActive
-        prisma.deal.aggregate({_sum: {amount: true}, where: {...prevWhere, NOT: {stage: {in: ["Lost"]}}}}),
+        // Revenue deals (previous)
+        prisma.deal.findMany({
+            where: {...prevWhere, NOT: {stage: {in: ["Lost"]}}},
+        }),
     ]);
+
+    // Calculate revenue: hourly deals use rate*hours, fixed deals use amount
+    const calcRevenue = (deals: any[]) => {
+        return deals.reduce((sum: number, d: any) => {
+            if (d.hourlyRate && d.hourlyRate > 0) {
+                return sum + (d.hourlyRate * (d.hoursLogged || 0));
+            }
+            return sum + (d.amount || 0);
+        }, 0);
+    };
+
+    const calcProjectedRevenue = (deals: any[]) => {
+        return deals.reduce((sum: number, d: any) => {
+            if (d.hourlyRate && d.hourlyRate > 0) {
+                const hours = d.hoursEstimated || d.hoursLogged || 0;
+                return sum + (d.hourlyRate * hours);
+            }
+            return sum + (d.amount || 0);
+        }, 0);
+    };
 
     return {
         totalDeals,
         totalActive,
         totalNew,
         totalWon,
-        totalContacted,
+        totalDiscovery,
         totalProposal,
-        totalNegotiation,
-        expectedRevenueActiveSum: expectedRevenueActive._sum.amount ?? 0,
+        totalDesign,
+        expectedRevenueActiveSum: calcRevenue(expectedRevenueActive),
+        projectedRevenueSum: calcProjectedRevenue(expectedRevenueActive),
         prevTotalDeals,
         prevTotalActive,
         prevTotalNew,
         prevTotalWon,
-        prevExpectedRevenueActiveSum: prevExpectedRevenueActive._sum.amount ?? 0,
+        prevExpectedRevenueActiveSum: calcRevenue(prevExpectedRevenueActive),
     };
 }
 
@@ -181,7 +205,7 @@ function toPctChange(range: RangeKey, prev: number, curr: number): number {
 
 export async function GET(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getSessionOrDev();
         if (!session?.user?.id) return NextResponse.json({error: "Unauthorized"}, {status: 401});
 
         const url = new URL(req.url);
@@ -205,9 +229,9 @@ export async function GET(req: Request) {
                 newDeals: metrics.totalNew,
                 activeDeals: metrics.totalActive,
                 wonDeals: metrics.totalWon,
-                contactedDeals: metrics.totalContacted,
+                discoveryDeals: metrics.totalDiscovery,
                 proposalDeals: metrics.totalProposal,
-                negotiationDeals: metrics.totalNegotiation,
+                designDeals: metrics.totalDesign,
                 conversionRate,
                 expectedRevenueUSD: metrics.expectedRevenueActiveSum,
                 changes: {

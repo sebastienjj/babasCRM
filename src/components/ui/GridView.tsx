@@ -115,7 +115,7 @@ export function GridView<T extends Record<string, any>>(props: GridViewProps<T>)
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
-        currency: "EUR",
+        currency: "USD",
         maximumFractionDigits: 0,
       }).format(value)
     } catch {
@@ -172,6 +172,9 @@ export function GridView<T extends Record<string, any>>(props: GridViewProps<T>)
     }
   }, [])
 
+  const columnCount = keys.length || 1
+  const columnWidth = `${Math.floor(100 / columnCount) - 1}%`
+
   return (
     <div
       className={cn(
@@ -181,7 +184,7 @@ export function GridView<T extends Record<string, any>>(props: GridViewProps<T>)
     >
       <div
         className={cn(
-          "flex items-start gap-4",
+          "flex items-start gap-3",
         )}
         role="list"
         aria-label="Grid columns"
@@ -194,9 +197,8 @@ export function GridView<T extends Record<string, any>>(props: GridViewProps<T>)
           return (
             <section
               key={key}
-              className={cn(
-                "min-w-[23.5%] w-[23.5%] flex-shrink-0",
-              )}
+              className="flex-shrink-0"
+              style={{ width: columnWidth, minWidth: 200 }}
               aria-label={`${label} column`}
               role="listitem"
               onDragOver={(e) => {

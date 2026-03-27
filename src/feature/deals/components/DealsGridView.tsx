@@ -54,11 +54,13 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
   if (!newStage || newStage === dealToUpdate.stage) return;
 
   const stageLabelMap: Record<string, string> = {
-    New: "Early Stage",
-    Proposal: "In Progress",
-    Negotiation: "In Progress",
-    Contacted: "Early Stage",
-
+    Lead: "Pipeline",
+    Discovery: "Pipeline",
+    Proposal: "Pipeline",
+    Design: "In Progress",
+    Development: "In Progress",
+    Review: "In Progress",
+    Launch: "Launch",
     Won: "Won",
     Lost: "Lost",
   };
@@ -89,7 +91,7 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
   }
 
   const openAddModalWithStage = (columnKey: string) => {
-    const stage = toStageFromColumn(columnKey, "New")
+    const stage = toStageFromColumn(columnKey, "Lead")
     setDefaultStage(stage)
     setEditDeal(null)
     setShowModal(true)
@@ -115,12 +117,16 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
         items={filteredDeals}
         groupBy={(d: Deal) => {
           switch (d.stage) {
-            case "New":
-            case "Contacted":
-              return "early-stage"
-                          case "Proposal":
-            case "Negotiation":
+            case "Lead":
+            case "Discovery":
+            case "Proposal":
+              return "pipeline"
+            case "Design":
+            case "Development":
+            case "Review":
               return "in-progress"
+            case "Launch":
+              return "launch"
             case "Won":
               return "won"
             case "Lost":
@@ -129,14 +135,21 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
               return String(d.stage)
           }
         }}
-        order={["early-stage", "in-progress", "won", "lost"]}
+        order={["pipeline", "in-progress", "launch", "won", "lost"]}
         labels={{
-          "early-stage": "Early Stage",
-          "in-progress": "In-Progress",
+          "pipeline": "Pipeline",
+          "in-progress": "In Progress",
+          "launch": "Launch",
           won: "Won",
           lost: "Lost",
         }}
-        getAmount={(d: Deal) => d.amount}
+        getAmount={(d: Deal) => {
+          const r = d as any;
+          if (r.hourlyRate && r.hourlyRate > 0) {
+            return r.hourlyRate * (r.hoursLogged || 0);
+          }
+          return d.amount;
+        }}
         renderColumnAction={(key: any) => (
           <button
             className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-[#E4E4E7] text-xs font-medium text-primary-foreground cursor-pointer"
@@ -156,8 +169,10 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
             ? "bg-[#10B981]"
             : key === "in-progress"
             ? "bg-orange-500"
-            : key === "early-stage"
-            ? "bg-gray-300"
+            : key === "pipeline"
+            ? "bg-blue-400"
+            : key === "launch"
+            ? "bg-purple-500"
             : undefined
         }
         // ✅ Make cards clickable
@@ -242,23 +257,24 @@ const handleMove = React.useCallback(async  ({ itemId, fromKey, toKey }: { itemI
 // Map column key back to a concrete stage
 function toStageFromColumn(columnKey: string, currentStage: Deal["stage"]): Deal["stage"] {
   switch (columnKey) {
-    case "early-stage":
-      return "New";
+    case "pipeline":
+      return "Lead";
 
     case "in-progress":
-      // Decide intelligently what "in-progress" means
-      if (currentStage === "New") return "Proposal"; // move up
-      if (currentStage === "Proposal") return "Proposal";
-      if (currentStage === "Negotiation") return "Negotiation";
-      if (currentStage === "Contacted") return "Contacted";
-      return "Proposal"; // default for unknown cases
+      // Keep current stage if already in-progress, otherwise default to Design
+      if (["Design", "Development", "Review"].includes(currentStage)) return currentStage;
+      return "Design";
+
+    case "launch":
+      return "Launch";
 
     case "won":
       return "Won";
 
     case "lost":
       return "Lost";
+
     default:
-      return currentStage
+      return currentStage;
   }
 }

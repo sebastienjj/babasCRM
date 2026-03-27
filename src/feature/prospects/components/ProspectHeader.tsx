@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react"
 import Filter from "@/components/filter"
 import { type FilterData } from "../libs/filterData"
 import ProspectModel from './ProspectModel'
+import CSVImportModal from './CSVImportModal'
 import { Prospect } from "../types/types"
 import { useProspectsStore } from "../stores/useProspectsStore"
 
@@ -30,11 +31,12 @@ function useDebounce<T>(value: T, delay: number): T {
 const statusOptions = [
   { value: "all", label: "All Status" },
   { value: "New", label: "New" },
-  { value: "Cold", label: "Cold" },
-  { value: "Qualified", label: "Qualified" },
-  { value: "Warmlead", label: "Warm-lead" },
-  { value: "converted", label: "Converted" },
-  { value: "notintrested", label: "Not-intrested" },
+  { value: "Researching", label: "Researching" },
+  { value: "Contacted", label: "Contacted" },
+  { value: "Responded", label: "Responded" },
+  { value: "MeetingBooked", label: "Meeting Booked" },
+  { value: "Converted", label: "Converted" },
+  { value: "NotInterested", label: "Not Interested" },
 ]
 const searchableCategories: (keyof FilterData)[] = ["owner", "tags"];
 
@@ -60,6 +62,7 @@ export function ProspectHeader({ selectedProspects = [], selectedProspectRows = 
   const [searchInput, setSearchInput] = useState("");
   
   const [showActionDropdown, setShowActionDropdown] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
 
   // Debounce search input with 500ms delay
   const debouncedSearchTerm = useDebounce(searchInput, 500);
@@ -146,12 +149,12 @@ export function ProspectHeader({ selectedProspects = [], selectedProspectRows = 
         flex items-center justify-between
         h-[68px]
         border-b border-[var(--border-gray)]
-        px-8 py-4
+        px-3 md:px-6 py-4
         bg-background
       "
     >
       {/* Left section - Search + Dropdown + Filter */}
-      <div className="flex w-[499px] h-[36px] items-center gap-2">
+      <div className="flex flex-1 min-w-0 h-[36px] items-center gap-2">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -240,12 +243,12 @@ export function ProspectHeader({ selectedProspects = [], selectedProspectRows = 
           Export
         </Button>
 
-        {/* Import */}
-        <Button 
+        {/* Import CSV */}
+        <Button
          leadingIcon={<img src="\icons\upload.svg" alt="upload" className="w-[17px] h-4 "/>}
-         onClick={handleImportProspects}
+         onClick={() => setShowCSVImport(true)}
         >
-         Import
+         Import CSV
         </Button>
 
         {/* New Deal */}
@@ -257,6 +260,11 @@ export function ProspectHeader({ selectedProspects = [], selectedProspectRows = 
         <ProspectModel open={showNewProspect} 
         onClose={handleCloseModal} mode={editProspect ? 'edit' : 'add'} prospect={editProspect || undefined} />
       
+      <CSVImportModal
+        open={showCSVImport}
+        onClose={() => setShowCSVImport(false)}
+        onImportComplete={() => useProspectsStore.getState().fetchProspects()}
+      />
      {showFilter && <Filter filters={filters} handleToggle={handleToggle} showFilter={showFilter} setShowFilter={() => setShowFilter((prev: boolean) => !prev)} searchableCategories={searchableCategories} setSearchQueries={setSearchQueries} searchQueries={searchQueries} classes="w-[300px] bg-white" />}
       
     </div>

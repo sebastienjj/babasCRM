@@ -13,11 +13,15 @@ type DealCardProps = {
 
 // Map stage -> subtle token-based badge styles (no hard-coded colors)
 const stageBadgeClass: Record<string, string> = {
-  new: "bg-accent text-accent-foreground",
-  contacted: "bg-muted text-muted-foreground",
-  proposal: "bg-secondary text-secondary-foreground",
-  won: "bg-primary/10 text-primary",
-  lost: "bg-destructive/10 text-destructive",
+  Lead: "bg-blue-50 text-blue-700",
+  Discovery: "bg-indigo-50 text-indigo-700",
+  Proposal: "bg-orange-50 text-orange-700",
+  Design: "bg-purple-50 text-purple-700",
+  Development: "bg-cyan-50 text-cyan-700",
+  Review: "bg-yellow-50 text-yellow-700",
+  Launch: "bg-violet-50 text-violet-700",
+  Won: "bg-primary/10 text-primary",
+  Lost: "bg-destructive/10 text-destructive",
 }
 
 const getCurrencySymbol = (currency?: string) => {
@@ -77,7 +81,14 @@ export function DealCard({ deal, className }: DealCardProps) {
 
         {/* Amount + contact */}
         <p className="mt-1 text-xs text-[var(--brand-gray)] ">
-          {formatCurrency(deal.amount, (deal as any).currency)} <span className=""> - {getContactName(deal.contact)}</span>
+          {(() => {
+            const r = deal as any;
+            if (r.hourlyRate && r.hourlyRate > 0) {
+              const earned = r.hourlyRate * (r.hoursLogged || 0);
+              return `${formatCurrency(earned, r.currency)} (${r.hoursLogged || 0}hrs @ ${formatCurrency(r.hourlyRate, r.currency)}/hr)`;
+            }
+            return formatCurrency(deal.amount, r.currency);
+          })()} <span className=""> - {getContactName(deal.contact)}</span>
         </p>
 
         {/* Date / tags / activity */}
@@ -108,20 +119,16 @@ export function DealCard({ deal, className }: DealCardProps) {
 
 function labelForStage(stage: Deal["stage"]) {
   switch (stage) {
-    case "New":
-      return "New"
-    case "Contacted":
-      return "Contacted"
-    case "Proposal":
-      return "Proposal Sent"
-    case "Negotiation":
-      return "Negotiation"
-    case "Won":
-      return "Won"
-    case "Lost":
-      return "Lost"
-    default:
-      return stage
+    case "Lead": return "Lead"
+    case "Discovery": return "Discovery"
+    case "Proposal": return "Proposal"
+    case "Design": return "Design"
+    case "Development": return "Development"
+    case "Review": return "Review"
+    case "Launch": return "Launch"
+    case "Won": return "Won"
+    case "Lost": return "Lost"
+    default: return stage
   }
 }
 

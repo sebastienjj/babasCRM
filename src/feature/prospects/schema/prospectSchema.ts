@@ -2,11 +2,12 @@ import { z } from "zod";
 
 const statusValues = [
   "New",
-  "Cold",
-  "Qualified",
-  "Warmlead",
+  "Researching",
+  "Contacted",
+  "Responded",
+  "MeetingBooked",
   "Converted",
-  "Notintrested",
+  "NotInterested",
 ] as const;
 
 export const createProspectSchema = z.object({

@@ -110,7 +110,7 @@ export const importProspectsFromExcel = async (file: File): Promise<{
               break;
             case 'status':
               // Validate status values based on Prospect type
-              const validStatuses = ['New', 'Cold', 'Qualified', 'Warmlead', 'Converted', 'Notintrested'];
+              const validStatuses = ['New', 'Researching', 'Contacted', 'Responded', 'MeetingBooked', 'Converted', 'NotInterested'];
               const status = cellValue.toString().trim();
               if (validStatuses.includes(status)) {
                 prospect[field] = status as Prospect['status'];
@@ -190,7 +190,7 @@ export const generateProspectImportTemplate = (filename?: string) => {
         'Company': 'XYZ Corp',
         'Email': 'sarah.johnson@xyz.com',
         'Phone': '+1-555-0456',
-        'Status': 'Qualified',
+        'Status': 'Responded',
         'Tags': 'SMB, Healthcare',
         'Notes': 'Ready to move forward with proposal',
       }

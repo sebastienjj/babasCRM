@@ -3,7 +3,7 @@ export interface DealData {
   dealName: string
   company: string
   contact: string
-  stage: 'New' | 'Contacted' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost'
+  stage: 'Lead' | 'Discovery' | 'Proposal' | 'Design' | 'Development' | 'Review' | 'Launch' | 'Won' | 'Lost'
   amount: number
   owner: string
   ownerImage?: string

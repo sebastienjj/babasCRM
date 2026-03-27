@@ -11,6 +11,7 @@ interface SidebarItemProps {
   onClick?: () => void;
   variant?: "parent" | "child";
   route?: string;
+  collapsed?: boolean;
 }
 
 const SidebarItem: React.FC<SidebarItemProps> = ({
@@ -20,16 +21,16 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   onClick,
   variant = "parent",
   route,
+  collapsed = false,
 }) => {
   const hasChildren = Boolean(children);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-    const pathname = usePathname(); 
-
+  const pathname = usePathname();
 
   const handleClick = () => {
     if (hasChildren) {
-      setIsOpen((prev) => !prev);
+      if (!collapsed) setIsOpen((prev) => !prev);
     } else if (route) {
       router.push(route);
     } else if (onClick) {
@@ -38,11 +39,9 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   };
   const isActive = route && pathname === route;
 
-  // Ensure image-based icons turn white when active. Lucide icons already follow currentColor.
+  // Ensure image-based icons turn white when active
   const renderedIcon = (() => {
     if (!icon || !isValidElement(icon)) return icon;
-
-    // Determine if the provided icon is an <img> and add filter when active
     const isImgTag = (icon as React.ReactElement).type === 'img';
     if (isImgTag) {
       const imgEl = icon as React.ReactElement<{ className?: string }>;
@@ -59,8 +58,9 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     <div>
       <button
         onClick={handleClick}
-        className={`flex cursor-pointer items-center justify-between ${
-          variant === "child" ? "w-[191px] h-[28px] pl-2" : "w-full h-[32px] p-2"
+        title={collapsed ? label : undefined}
+        className={`flex cursor-pointer items-center ${collapsed ? "justify-center" : "justify-between"} ${
+          variant === "child" ? "w-full h-[28px] pl-2" : "w-full h-[32px] p-2"
         } gap-2 rounded-md ${
           variant === "child" ? "leading-[16px] text-xs" : "leading-[20px] text-sm"
         } font-normal transition-colors ${
@@ -70,19 +70,19 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
         }`}
         aria-expanded={hasChildren ? isOpen : undefined}
       >
-        <span className="flex items-center gap-2 w-full">
-          {renderedIcon}
-          <span>{label}</span>
+        <span className={`flex items-center gap-2 ${collapsed ? "" : "w-full"}`}>
+          <span className="flex-shrink-0">{renderedIcon}</span>
+          {!collapsed && <span className="truncate">{label}</span>}
         </span>
-        {hasChildren && (
+        {hasChildren && !collapsed && (
           <ChevronDown
             size={16}
-            className={`transition-transform ${isOpen ? "rotate-0" : "-rotate-90"}`}
+            className={`flex-shrink-0 transition-transform ${isOpen ? "rotate-0" : "-rotate-90"}`}
           />
         )}
       </button>
 
-      {hasChildren && isOpen && (
+      {hasChildren && isOpen && !collapsed && (
         <div className="ml-4 mt-1 overflow-hidden flex flex-col gap-1 border-l border-[var(--border-gray)] pl-3">
           {Children.map(children, (child) => {
             if (isValidElement(child)) {

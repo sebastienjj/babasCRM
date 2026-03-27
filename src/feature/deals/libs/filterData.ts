@@ -12,11 +12,14 @@ export interface FilterData {
     
 export const filterData: FilterData = {
   status: [
-    { id: "all", label: "All Status", checked: true },
-    { id: "new", label: "New", checked: false },
-    { id: "contacted", label: "Contacted", checked: false },
-    { id: "proposal", label: "Proposal Sent", checked: false },
-    { id: "negotiation", label: "Negotiation", checked: false },
+    { id: "all", label: "All Stages", checked: true },
+    { id: "lead", label: "Lead", checked: false },
+    { id: "discovery", label: "Discovery", checked: false },
+    { id: "proposal", label: "Proposal", checked: false },
+    { id: "design", label: "Design", checked: false },
+    { id: "development", label: "Development", checked: false },
+    { id: "review", label: "Review", checked: false },
+    { id: "launch", label: "Launch", checked: false },
     { id: "won", label: "Won", checked: false },
     { id: "lost", label: "Lost", checked: false },
   ],

@@ -4,8 +4,7 @@ import { hash } from "bcryptjs"
 import { sendEmail } from "@/libs/email"
 import { withActivityLogging } from "@/libs/apiUtils"
 import { ActivityAction } from "@prisma/client"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/feature/auth/lib/auth"
+import { getSessionOrDev } from "@/libs/devSession"
 import { randomBytes } from "crypto"
 
 export async function GET(req: Request) {
@@ -34,7 +33,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getSessionOrDev()
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -102,7 +101,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getSessionOrDev()
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

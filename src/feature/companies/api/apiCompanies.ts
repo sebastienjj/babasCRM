@@ -1,7 +1,6 @@
 // src/feature/companies/api/apiCompanies.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/feature/auth/lib/auth";
+import { getSessionOrDev } from "@/libs/devSession";
 import { prisma } from "@/libs/prisma";
 import { createCompanySchema, updateCompanySchema } from "../schema/companySchema";
 import { withActivityLogging } from "@/libs/apiUtils";
@@ -9,7 +8,7 @@ import { ActivityAction, Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionOrDev();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -143,7 +142,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "PATCH") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
@@ -208,7 +207,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "DELETE") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }

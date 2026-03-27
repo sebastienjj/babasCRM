@@ -45,13 +45,16 @@ export interface TableRowProps<T = any> {
 // Badge component for stage indicators
 const Badge: React.FC<{ 
   children: React.ReactNode
-  variant: 'New' | 'Contacted' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost'
+  variant: 'Lead' | 'Discovery' | 'Proposal' | 'Design' | 'Development' | 'Review' | 'Launch' | 'Won' | 'Lost'
 }> = ({ children, variant }) => {
-  const variantClasses = {
-    New: 'bg-blue-100 text-blue-800',
-    Contacted: 'bg-purple-100 text-purple-800',
+  const variantClasses: Record<string, string> = {
+    Lead: 'bg-blue-100 text-blue-800',
+    Discovery: 'bg-indigo-100 text-indigo-800',
     Proposal: 'bg-orange-100 text-orange-800',
-    Negotiation: 'bg-yellow-100 text-yellow-800',
+    Design: 'bg-purple-100 text-purple-800',
+    Development: 'bg-cyan-100 text-cyan-800',
+    Review: 'bg-yellow-100 text-yellow-800',
+    Launch: 'bg-violet-100 text-violet-800',
     Won: 'bg-green-100 text-green-800',
     Lost: 'bg-red-100 text-red-800'
   }
@@ -114,7 +117,7 @@ const TableRow = <T,>({
       {columns.map((column) => (
         <td 
           key={column.key} 
-          className="px-6 py-3 text-sm text-[var(--foreground)] whitespace-nowrap"
+          className="px-4 py-3 text-sm text-[var(--foreground)] truncate overflow-hidden"
           style={{ width: column.width }}
         >
           {column.avatar ? (
@@ -255,7 +258,7 @@ export const Table = <T,>({
        w-full max-w-full overflow-hidden ${className}`}
   >
     <div ref={scrollRef} className="relative custom-scrollbar  overflow-x-auto">
-      <table className="divide-y w-full divide-[var(--border-gray)]">
+      <table className="divide-y w-full table-fixed divide-[var(--border-gray)]">
           <thead className="">
             <tr>
               {selectable && (
@@ -283,7 +286,7 @@ export const Table = <T,>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-3 text-left text-sm font-medium text-[var(--foreground)]  whitespace-nowrap ${
+                  className={`px-4 py-3 text-left text-sm font-medium text-[var(--foreground)] whitespace-nowrap ${
                     column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
                   }`}
                   style={{

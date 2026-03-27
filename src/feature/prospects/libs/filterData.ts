@@ -13,12 +13,13 @@ export interface FilterData {
 export const filterData: FilterData = {
   status: [
     { id: "all", label: "All Status", checked: true },
-    { id: "new", label: "New", checked: false },
-    { id: "Cold", label: "Cold", checked: false },
-    { id: "Qualified", label: "Qualified", checked: false },
-    { id: "Warmlead", label: "Warm-lead", checked: false },
-    { id: "converted", label: "Converted", checked: false },
-    { id: "notintrested", label: "Not-intrested", checked: false },
+    { id: "New", label: "New", checked: false },
+    { id: "Researching", label: "Researching", checked: false },
+    { id: "Contacted", label: "Contacted", checked: false },
+    { id: "Responded", label: "Responded", checked: false },
+    { id: "MeetingBooked", label: "Meeting Booked", checked: false },
+    { id: "Converted", label: "Converted", checked: false },
+    { id: "NotInterested", label: "Not Interested", checked: false },
   ],
 
   owner: [

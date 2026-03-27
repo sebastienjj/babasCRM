@@ -46,12 +46,13 @@ export const useProspectsStore = create<ProspectStore>((set, get) => ({
   filters: {
     status: [
       { id: "all", label: "All Status", checked: true },
-      { id: "new", label: "New", checked: false },
-      { id: "Cold", label: "Cold", checked: false },
-      { id: "Qualified", label: "Qualified", checked: false },
-      { id: "Warmlead", label: "Warm-lead", checked: false },
-      { id: "converted", label: "Converted", checked: false },
-      { id: "notintrested", label: "Not-intrested", checked: false },
+      { id: "New", label: "New", checked: false },
+      { id: "Researching", label: "Researching", checked: false },
+      { id: "Contacted", label: "Contacted", checked: false },
+      { id: "Responded", label: "Responded", checked: false },
+      { id: "MeetingBooked", label: "Meeting Booked", checked: false },
+      { id: "Converted", label: "Converted", checked: false },
+      { id: "NotInterested", label: "Not Interested", checked: false },
     ],
     owner: [],
     tags: [
@@ -113,12 +114,13 @@ export const useProspectsStore = create<ProspectStore>((set, get) => ({
       const activeStatus = filters.status.filter((s: any) => s.checked && s.id !== "all");
       if (activeStatus.length > 0) {
         const statusMap: Record<string, string> = {
-          new: 'New',
-          Cold: 'Cold',
-          Qualified: 'Qualified',
-          Warmlead: 'Warmlead',
-          converted: 'Converted',
-          notintrested: 'Notintrested',
+          New: 'New',
+          Researching: 'Researching',
+          Contacted: 'Contacted',
+          Responded: 'Responded',
+          MeetingBooked: 'MeetingBooked',
+          Converted: 'Converted',
+          NotInterested: 'NotInterested',
         };
         const statuses = activeStatus.map((f: any) => statusMap[f.id]).filter(Boolean);
         if (statuses.length > 0) {
@@ -173,12 +175,13 @@ export const useProspectsStore = create<ProspectStore>((set, get) => ({
     const initial = {
       status: [
         { id: "all", label: "All Status", checked: true },
-        { id: "new", label: "New", checked: false },
-        { id: "Cold", label: "Cold", checked: false },
-        { id: "Qualified", label: "Qualified", checked: false },
-        { id: "Warmlead", label: "Warm-lead", checked: false },
-        { id: "converted", label: "Converted", checked: false },
-        { id: "notintrested", label: "Not-intrested", checked: false },
+        { id: "New", label: "New", checked: false },
+        { id: "Researching", label: "Researching", checked: false },
+        { id: "Contacted", label: "Contacted", checked: false },
+        { id: "Responded", label: "Responded", checked: false },
+        { id: "MeetingBooked", label: "Meeting Booked", checked: false },
+        { id: "Converted", label: "Converted", checked: false },
+        { id: "NotInterested", label: "Not Interested", checked: false },
       ],
       owner: get().generateOwnerOptions(),
       tags: [

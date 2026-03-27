@@ -15,7 +15,7 @@ export const sidebarItems: SidebarLink[] = [
     prefetch: true
   },
   {
-    label: "Deals",
+    label: "Projects",
     icon: "/sideBarIcons/handshake.svg",
     route: "/deals",
     prefetch: true
@@ -33,7 +33,7 @@ export const sidebarItems: SidebarLink[] = [
     prefetch: true
   },
   { 
-    label: "Prospects", 
+    label: "Leads", 
     icon: "/sideBarIcons/trending-up.svg",
     route: "/prospects",
     prefetch: true

@@ -9,8 +9,8 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Klickbee CRM',
-  description: 'A modern CRM built with Next.js',
+  title: 'Premia Studio',
+  description: 'Web design project management by Premia Studio',
   icons: {
     icon: '/icons/Logo.svg',
   },

@@ -1,7 +1,6 @@
 // src/feature/todo/api/apiTodos.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/feature/auth/lib/auth";
+import { getSessionOrDev } from "@/libs/devSession";
 import { prisma } from "@/libs/prisma";
 import { createTodoSchema, updateTodoSchema } from "../schema/todoSchema";
 import { ActivityAction, Prisma } from "@prisma/client";
@@ -9,7 +8,7 @@ import { withActivityLogging } from "@/libs/apiUtils";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionOrDev();
     if (!session?.user?.id)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -144,7 +143,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "PATCH") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id)
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -207,7 +206,7 @@ export async function handleMethodWithId(req: Request, id: string) {
     }
 
     if (method === "DELETE") {
-      const session = await getServerSession(authOptions);
+      const session = await getSessionOrDev();
       if (!session?.user?.id)
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

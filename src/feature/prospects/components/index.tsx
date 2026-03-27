@@ -15,85 +15,90 @@ import { DateConvertion } from '@/libs/utils/dateConvertion';
 export const prospectsColumns: TableColumn<Prospect>[] = [
   {
     key: 'fullName',
-    title: 'Full Name',
+    title: 'Name',
     dataIndex: 'fullName',
     sortable: true,
+    width: '18%',
   },
-    { key: 'company', title: 'Company', dataIndex: 'company', sortable: false, render: (company) => {
-      if (!company) return '-';
-      if (typeof company === 'string') return company;
-      if (typeof company === 'object' && company?.fullName) return company.fullName;
-      return 'Unknown Company';
-    } },
+  {
+    key: 'domain',
+    title: 'Domain',
+    dataIndex: 'domain' as any,
+    sortable: false,
+    width: '15%',
+    render: (_val: any, record: any) => {
+      const domain = record?.domain;
+      if (!domain) return <span className="text-gray-400">-</span>;
+      return <span className="text-xs truncate block max-w-[140px]">{domain}</span>;
+    },
+  },
   {
     key: 'email',
     title: 'Email',
     dataIndex: 'email',
     sortable: false,
+    width: '18%',
+    render: (email: any) => email ? <span className="text-xs truncate block max-w-[160px]">{email}</span> : <span className="text-gray-400">-</span>,
   },
   {
-    key: 'phone',
-    title: 'Phone',
-    dataIndex: 'phone',
+    key: 'source',
+    title: 'Source',
+    dataIndex: 'source' as any,
     sortable: false,
+    width: '10%',
+    render: (_val: any, record: any) => {
+      const source = record?.source;
+      if (!source) return <span className="text-gray-400">-</span>;
+      return <span className="text-xs">{source}</span>;
+    },
   },
-     { key: 'owner', title: 'Owner', dataIndex: 'owner', sortable: false, render: (owner, record) => {
-      if (!owner) return 'Unassigned';
-      if (typeof owner === 'string') return owner;
-      if (typeof owner === 'object' && owner?.name) return owner.name;
-      return 'Unknown';
-    }, avatar: { srcIndex: 'ownerImage', altIndex: 'owner', size: 32 } },
   {
     key: 'status',
     title: 'Status',
     dataIndex: 'status',
+    width: '12%',
     render: (status?: Prospect['status']) => {
       const cls: Record<NonNullable<Prospect['status']>, string> = {
         New: 'bg-[#E4E4E7] text-[#3F3F46]',
-        Cold: 'bg-[#DBEAFE] text-[#1D4ED8]',
-        Qualified: 'bg-green-100 text-green-700',
-        Warmlead: 'bg-[#FEF3C7] text-[#92400E]',
+        Researching: 'bg-[#DBEAFE] text-[#1D4ED8]',
+        Contacted: 'bg-[#E0E7FF] text-[#4338CA]',
+        Responded: 'bg-green-100 text-green-700',
+        MeetingBooked: 'bg-[#FEF3C7] text-[#92400E]',
         Converted: 'bg-teal-100 text-teal-700',
-        Notintrested: 'bg-[#FEE2E2] text-[#B91C1C]',
+        NotInterested: 'bg-[#FEE2E2] text-[#B91C1C]',
       };
-
+      const labels: Record<string, string> = { MeetingBooked: 'Meeting', NotInterested: 'Not Int.' };
       const classes = status ? cls[status] : 'bg-gray-100 text-gray-500';
-
       return (
-        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${classes}`}>
-          {status ?? 'Unknown'}
+        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap ${classes}`}>
+          {labels[status ?? ''] ?? status ?? 'Unknown'}
         </span>
       );
     },
   },
-  {
-    key: 'lastContact',
-    title: 'Last Contact',
-    dataIndex: 'lastContact',
-    sortable: false,
-     render: (_val, record) => {
-               const dateString = (record as Prospect )?.lastContact;
-                 const time =  DateConvertion(dateString);
-                 const lastActivity = time === '-' ? time : `${time} - ${(record as Prospect)?.status}`
-                 return lastActivity
-             },
-  },
+  { key: 'owner', title: 'Owner', dataIndex: 'owner', sortable: false, width: '12%', render: (owner: any) => {
+      if (!owner) return 'Unassigned';
+      if (typeof owner === 'string') return <span className="text-xs truncate block max-w-[100px]">{owner}</span>;
+      if (typeof owner === 'object' && owner?.name) return <span className="text-xs truncate block max-w-[100px]">{owner.name}</span>;
+      return 'Unknown';
+    }, avatar: { srcIndex: 'ownerImage', altIndex: 'owner', size: 24 } },
   {
     key: 'tags',
     title: 'Tags',
     dataIndex: 'tags',
     sortable: false,
+    width: '12%',
     render: (tags?: string[]) => {
-      if (!tags || tags.length === 0) return '-';
+      if (!tags || tags.length === 0) return <span className="text-gray-400">-</span>;
       return (
         <div className="flex flex-wrap gap-1">
           {tags.slice(0, 2).map((tag, index) => (
-            <span key={index} className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-gray-800">
+            <span key={index} className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-gray-700 bg-gray-100 rounded">
               {tag}
             </span>
           ))}
           {tags.length > 2 && (
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-gray-800">
+            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
               +{tags.length - 2}
             </span>
           )}
@@ -160,7 +165,7 @@ export default function Prospects () {
           setSelectedProspectRows([]);
         }}
       />
-       <div className='py-8 px-6 overflow-x-hidden'>
+       <div className='py-4 px-3 md:py-6 md:px-4 lg:px-6 overflow-x-hidden'>
          {loading ? (
            <Loading label="Loading Prospects..." />
          ) : (
