@@ -2,6 +2,7 @@
 import React from "react";
 import DetailModal, {FileAttachment} from "@/components/detailPage";
 import type { Customer } from "../types/types";
+import ClientBrain from "@/components/ClientBrain";
 
 // Helper function to render status badge
 const renderStatusBadge = (status?: Customer['status']) => {
@@ -74,6 +75,12 @@ export default function CustomerDetail({
       editLabel="Edit Customer"
       onAddNotes={onAddNotes ? () => onAddNotes(customer.id) : undefined}
       onExport={onExport ? () => onExport(customer.id) : undefined}
+      extraContent={
+        <ClientBrain
+          customerId={customer.id}
+          title="Client Brain"
+        />
+      }
     />
   );
 }

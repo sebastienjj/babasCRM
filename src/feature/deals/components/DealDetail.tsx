@@ -1,9 +1,10 @@
 'use client';
 import React from 'react';
-import DetailModal from '@/components/detailPage'; // the reusable modal we built earlier
+import DetailModal from '@/components/detailPage';
 import { Badge } from '@/components/ui/Table';
 import { Deal } from '../types';
 import AvatarInitials from '@/components/ui/AvatarInitials'
+import ClientBrain from '@/components/ClientBrain'
 
 interface DealDetailProps {
   isOpen: boolean;
@@ -127,6 +128,15 @@ export default function DealDetail({
       isDeleting={isDeleting}
       isEditing={isEditing}
       isExporting={isExporting}
+      extraContent={
+        <ClientBrain
+          dealId={deal.id}
+          title="Project Files"
+          showSharedFiles={true}
+          sharedCustomerId={d.contactId || undefined}
+          sharedCompanyId={d.companyId || undefined}
+        />
+      }
     />
   );
 }
